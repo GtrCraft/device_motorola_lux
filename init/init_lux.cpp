@@ -1,6 +1,5 @@
 /*
    Copyright (c) 2014, The Linux Foundation. All rights reserved.
-
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions are
    met:
@@ -13,7 +12,6 @@
     * Neither the name of The Linux Foundation nor the names of its
       contributors may be used to endorse or promote products derived
       from this software without specific prior written permission.
-
    THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
    WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
@@ -41,27 +39,24 @@ static void single_sim(void);
 
 void vendor_load_properties()
 {
-    char device[PROP_VALUE_MAX];
-    char devicename[PROP_VALUE_MAX];
-    FILE *fp;
-    bool force_msim = false;
+    std::string carrier;
+    std::string device;
+    std::string sku;
+    std::string platform;
+    std::string radio;
 
-    std::string platform = property_get("ro.board.platform");
+    platform = property_get("ro.board.platform");
     if (platform != ANDROID_TARGET)
         return;
 
-    std::string radio = property_get("ro.boot.radio");
-    std::string sku = property_get("ro.boot.hardware.sku");
-    std::string carrier = property_get("ro.boot.carrier");
-    std::string numsims = property_get("ro.boot.num-sims");
+    radio = property_get("ro.boot.radio");
+    sku = property_get("ro.boot.hardware.sku");
+    carrier = property_get("ro.boot.carrier");
 
     property_set("ro.product.model", sku.c_str());
 
-    if (atoi(numsims) >= 2)
-        force_msim = true;
-
-    if (!force_msim && (carrier "retgb" || carrier "reteu" || carrier "retde"
-            || carrier "vfau")) {
+    if (carrier == "retgb" || carrier == "reteu" || carrier == "retde"
+            || carrier == "vfau") {
         // These are single SIM XT1562 devices
         single_sim();
         property_set("ro.product.device", "lux");
@@ -74,7 +69,7 @@ void vendor_load_properties()
         property_set("persist.radio.mot_ecc_enabled", "1");
         property_set("persist.radio.process_sups_ind", "0");
     }
-    else if ((sku "XT1562" || radio "0x4")) {
+    else if (sku == "XT1562" || radio == "0x4") {
         dual_sim();
         property_set("ro.product.device", "lux_uds");
         property_set("ro.build.description", "lux_retasia_ds-user 5.1.1 LPD23.118-10 14 release-keys");
@@ -86,8 +81,8 @@ void vendor_load_properties()
         property_set("persist.radio.mot_ecc_enabled", "1");
         property_set("persist.radio.process_sups_ind", "0");
     }
-    else if (force_msim || carrier "retbr" || carrier "retla" || carrier "tefbr"
-            || carrier "timbr" || carrier "retmx") {
+    else if (carrier == "retbr" || carrier == "retla" || carrier == "tefbr"
+            || carrier == "timbr" || carrier == "retmx") {
         // These are dual SIM XT1563 devices
         dual_sim();
         property_set("ro.product.device", "lux_uds");
@@ -99,7 +94,7 @@ void vendor_load_properties()
         property_set("persist.radio.mot_ecc_enabled", "1");
         property_set("persist.radio.process_sups_ind", "1");
     }
-    else if ((sku "XT1563" || radio, "0x8")) {
+    else if (sku == "XT1563" || radio == "0x8") {
         single_sim();
         property_set("ro.product.device", "lux");
         property_set("ro.build.description", "lux_retca-user 5.1.1 LPD23.118-10 19 release-keys");
@@ -111,8 +106,8 @@ void vendor_load_properties()
         property_set("persist.radio.process_sups_ind", "1");
     }
 
-    property_get("ro.product.device", device);
-    strlcpy(devicename, device, sizeof(devicename));
+    device = property_get("ro.product.device");
+    INFO("Found radio id: %s setting build properties for %s device\n", radio.c_str(), device.c_str());
 }
 
 static void dual_sim(void)
